@@ -67,7 +67,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build and push Docker image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: winx-app
@@ -82,8 +82,9 @@ jobs:
     needs: push
 
     env:
-      CONTAINER_REGISTRY_URL: 664047078509.dkr.ecr.eu-west-2.amazonaws.com/winx-app
-      CONTAINER_REPOSITORY_NAME: winx-app
+      ECR_REGISTRY: 664047078509.dkr.ecr.eu-west-2.amazonaws.com
+      ECR_REPOSITORY: winx-app
+      IMAGE_TAG: latest
       S3_DEPLOY_BUCKET: winx-app-bucket
       ELASTIC_BEANSTALK_APP_NAME: winx-task-listing-app
       ELASTIC_BEANSTALK_ENV_NAME: winx-task-listing-app-environment
@@ -99,36 +100,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
 
-      - name: Make create_dockerrun.sh executable
+      - name: Make script executable
         run: chmod +x ./aws/create_dockerrun.sh
 
       - name: Create Dockerrun.aws.json
-        run: ./create_dockerrun.sh
-        working-directory: ./aws
+        run: ./aws/create_dockerrun.sh
         env:
-          CONTAINER_REGISTRY_URL: ${{ env.CONTAINER_REGISTRY_URL }}
-          CONTAINER_REPOSITORY_NAME: ${{ env.CONTAINER_REPOSITORY_NAME }}
-          GITHUB_SHA: ${{ github.sha }}
+          CONTAINER_REGISTRY_URL: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}
 
       - name: Verify Dockerrun file exists
-        run: ls -lah ./aws/
+        run: ls -lah
 
-      - name: Upload Dockerrun.aws.json to S3
-        run: |
-          echo "Uploading Dockerrun.aws.json to S3"
-          aws s3 cp ./aws/Dockerrun.aws.json s3://$S3_DEPLOY_BUCKET/Dockerrun.aws.json
+      - name: Upload Dockerrun to S3
+        run: aws s3 cp Dockerrun.aws.json s3://$S3_DEPLOY_BUCKET/
 
       - name: Deploy to Elastic Beanstalk
         run: |
-          echo "Creating application version"
-
           aws elasticbeanstalk create-application-version \
             --application-name "$ELASTIC_BEANSTALK_APP_NAME" \
             --version-label "$GITHUB_SHA" \
-            --source-bundle S3Bucket="$S3_DEPLOY_BUCKET",S3Key="Dockerrun.aws.json" \
-            --no-auto-create-application
-
-          echo "Updating environment"
+            --source-bundle S3Bucket="$S3_DEPLOY_BUCKET",S3Key="Dockerrun.aws.json"
 
           aws elasticbeanstalk update-environment \
             --application-name "$ELASTIC_BEANSTALK_APP_NAME" \
