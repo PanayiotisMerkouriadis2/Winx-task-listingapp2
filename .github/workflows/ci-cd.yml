@@ -25,7 +25,7 @@ jobs:
       - name: Set up PostgreSQL
         uses: Harmon758/postgresql-action@v1
         with:
-          postgresql version: '13'
+          postgresql version: '17.6'
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
@@ -70,8 +70,8 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: PLACEHOLDER-FOR-YOUR-ECR-REPOSITORY
-          IMAGE_TAG: PLACEHOLDER-FOR-YOUR-APP-IMAGE-TAG
+          ECR_REPOSITORY: "winx-app"
+          IMAGE_TAG: "latest"
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -80,11 +80,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: push
     env:
-      CONTAINER_REGISTRY_URL: "placeholder-registry-url"
-      CONTAINER_REPOSITORY_NAME: "placeholder-repo-name"
-      S3_DEPLOY_BUCKET: "placeholder-deploy-bucket"
-      ELASTIC_BEANSTALK_APP_NAME: "placeholder-app-name"
-      ELASTIC_BEANSTALK_ENV_NAME: "placeholder-env-name"
+      CONTAINER_REGISTRY_URL: "664047078509.dkr.ecr.eu-west-2.amazonaws.com/winx-app"
+      CONTAINER_REPOSITORY_NAME: "winx-app"
+      S3_DEPLOY_BUCKET: "winx-app-bucket"
+      ELASTIC_BEANSTALK_APP_NAME: "winx-task-listing-app"
+      ELASTIC_BEANSTALK_ENV_NAME: "winx-task-listing-app-environment"
 
     steps:
       - name: Checkout code
