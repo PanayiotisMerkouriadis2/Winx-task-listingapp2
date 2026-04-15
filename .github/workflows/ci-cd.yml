@@ -82,7 +82,7 @@ jobs:
     env:
       CONTAINER_REGISTRY_URL: "664047078509.dkr.ecr.eu-west-2.amazonaws.com/winx-app"
       CONTAINER_REPOSITORY_NAME: "winx-app"
-      S3_DEPLOY_BUCKET: "winx-app-bucket"
+      S3_DEPLOY_BUCKET: "arn:aws:s3:::winx-app-bucket"
       ELASTIC_BEANSTALK_APP_NAME: "winx-task-listing-app"
       ELASTIC_BEANSTALK_ENV_NAME: "winx-task-listing-app-environment"
 
