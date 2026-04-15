@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# See link for format required by AWS for the Dockerrun.aws.json file
-# https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/single-container-docker-configuration.html
 cat <<EOF > Dockerrun.aws.json
 {
   "AWSEBDockerrunVersion": "1",
@@ -18,4 +16,8 @@ cat <<EOF > Dockerrun.aws.json
 EOF
 
 echo "Created Dockerrun file"
+ls -la
 cat Dockerrun.aws.json
+
+echo "Uploading to S3"
+aws s3 cp Dockerrun.aws.json "s3://$S3_DEPLOY_BUCKET/"
